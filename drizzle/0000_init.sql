@@ -1,0 +1,20 @@
+CREATE TABLE `test_submissions` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`public_id` varchar(36) NOT NULL,
+	`full_name` varchar(120) NOT NULL,
+	`age` int NOT NULL,
+	`school` varchar(150) NOT NULL,
+	`email` varchar(254) NOT NULL,
+	`answers` json NOT NULL,
+	`scores` json,
+	`recommended_careers` json,
+	`pdf_generated` boolean NOT NULL DEFAULT false,
+	`email_sent` boolean NOT NULL DEFAULT false,
+	`email_id` varchar(100),
+	`delivery_error` text,
+	`completed_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `test_submissions_id` PRIMARY KEY(`id`),
+	CONSTRAINT `test_submissions_public_id_unique` UNIQUE(`public_id`)
+);
