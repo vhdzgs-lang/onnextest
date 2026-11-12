@@ -15,10 +15,10 @@ const FORMATS = [
 
 const ROWS: [string, string][] = [
   ["Preguntas genéricas", "50 preguntas pensadas para prepa en México"],
-  ["Un resultado automático y ya", "Un orientador revisa tus resultados contigo"],
+  ["Un resultado automático y ya", "Recibe tu reporte profesional de 7 páginas por WhatsApp"],
   ["“Eres creativo” y nada más", "Personalidad, fortalezas, intereses y competencias"],
   ["Carreras de otros países", "3 carreras compatibles, con su campo laboral en México"],
-  ["Nada que puedas consultar después", "Reporte profesional de 7 páginas"],
+  ["Largos y cansados", "De 10 a 15 minutos, desde tu celular"],
 ];
 
 function html(width: number, height: number, tall: boolean): string {
@@ -65,7 +65,6 @@ function html(width: number, height: number, tall: boolean): string {
     <div class="col them"><div class="head">Otros tests</div>${ROWS.map(([a]) => `<div class="cell">${x}<span>${a}</span></div>`).join("")}</div>
     <div class="col us"><div class="head">Onnex Test</div>${ROWS.map(([, b]) => `<div class="cell">${ok}<span>${b}</span></div>`).join("")}</div>
   </div>
-  ${tall ? `<p class="foot">Toma de 10 a 15 minutos y lo haces desde tu celular.</p>` : ""}
   <div class="bottom">
     <div class="price"><small>Precio de lanzamiento</small><div><b>$299</b><s>$499</s></div></div>
     <div class="cta"><small>Pide tu código por WhatsApp</small><span>${BRAND.contactPhone}</span></div>
