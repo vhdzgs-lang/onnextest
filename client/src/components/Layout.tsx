@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "wouter";
+import { BRAND } from "@shared/brand";
 import { Logo } from "./Logo";
 
 export function Navbar({ right }: { right?: ReactNode }) {
@@ -21,7 +22,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:px-6">
         <Logo size={28} />
         <p className="text-center">
-          Orientación vocacional para estudiantes de preparatoria · Informes: <a className="whitespace-nowrap font-semibold text-slate-700" href="tel:+528333435410">833 343 5410</a>
+          Orientación vocacional para estudiantes de preparatoria · Informes: <a className="whitespace-nowrap font-semibold text-slate-700" href={BRAND.whatsappUrl} target="_blank" rel="noopener noreferrer">WhatsApp {BRAND.contactPhone}</a>
         </p>
       </div>
     </footer>

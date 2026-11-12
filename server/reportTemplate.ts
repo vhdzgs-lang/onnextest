@@ -283,7 +283,7 @@ export function renderReportHtml(report: VocationalReport): string {
     <h3>Cómo investigar universidades</h3>${list(report.universityTips, "checks")}
     <div class="final"><strong>Mensaje final de orientación</strong><p style="margin:1.5mm 0 0">${e(report.finalMessage)}</p></div>
     <div class="disclaimer"><strong>Nota importante.</strong> ${e(report.disclaimer)}</div>
-    <div class="contact">${logoInline(30, "end")}<span>Contacto: <strong>${e(BRAND.contactPhone)}</strong> · ${e(BRAND.contactEmail)}</span></div>`,
+    <div class="contact">${logoInline(30, "end")}<span>WhatsApp: <strong>${e(BRAND.contactPhone)}</strong> · ${e(BRAND.contactEmail)}</span></div>`,
   );
 
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Reporte Onnex Test - ${e(s.fullName)}</title><style>${CSS}</style></head><body>${p1}${p2}${p3}${p4}${p5}${p6}${p7}</body></html>`;

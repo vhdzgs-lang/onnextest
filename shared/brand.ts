@@ -4,7 +4,9 @@ export const BRAND = {
   blue: "#2563EB",
   purple: "#7C3AED",
   ink: "#0B0B12",
-  contactPhone: "833 343 5410",
+  contactPhone: "(833) 258 4802",
+  /** Enlace de WhatsApp del número de contacto. */
+  whatsappUrl: "https://wa.me/528332584802",
   contactEmail: "vhdzgs@gmail.com",
 } as const;
 

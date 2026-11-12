@@ -1,5 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
 import { Redirect } from "wouter";
+import { BRAND } from "@shared/brand";
 import { Logo } from "@/components/Logo";
 import { session } from "@/lib/session";
 
@@ -20,9 +21,9 @@ export default function Done() {
           {CONFIRMATION_MESSAGE}
         </p>
         <p className="mt-6 text-sm text-slate-500">
-          ¿Dudas? Escríbenos o llámanos al{" "}
-          <a href="tel:+528333435410" className="whitespace-nowrap font-semibold text-slate-700">
-            833 343 5410
+          ¿Dudas? Escríbenos por WhatsApp al{" "}
+          <a href={BRAND.whatsappUrl} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap font-semibold text-slate-700">
+            {BRAND.contactPhone}
           </a>
           .
         </p>

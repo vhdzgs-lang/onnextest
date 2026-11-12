@@ -32,7 +32,7 @@ describe("plantilla del reporte", () => {
     expect(html).toContain("Onnex Test");
     expect(html).toContain("<svg");
     for (const v of [student.fullName, student.school, "17 años", "28 de octubre de 2026"]) expect(html).toContain(escapeHtml(v));
-    expect(html).toContain("833 343 5410");
+    expect(html).toContain("(833) 258 4802");
     expect(html).toMatch(/no sustituye una evaluación psicológica clínica/i);
   });
 });
