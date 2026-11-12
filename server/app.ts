@@ -24,6 +24,15 @@ export function rateLimit({ windowMs, max }: { windowMs: number; max: number }) 
   };
 }
 
+/** Aplica un límite solo a ciertos procedimientos de tRPC (también cuando vienen agrupados en una sola petición). */
+function limitProcedures(match: (procedure: string) => boolean, limiter: ReturnType<typeof rateLimit>) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const procedures = req.path.replace(/^\//, "").replace(/%2C/gi, ",").split(",");
+    if (procedures.some(match)) return limiter(req, res, next);
+    next();
+  };
+}
+
 export function createApp(deps: Deps, options: { staticDir?: string; health?: () => Record<string, unknown> } = {}) {
   const app = express();
   app.disable("x-powered-by");
@@ -40,13 +49,19 @@ export function createApp(deps: Deps, options: { staticDir?: string; health?: ()
     res.json({ ok: true, ...(options.health?.() ?? {}) });
   });
 
-  app.use("/api/trpc/test.submit", rateLimit({ windowMs: 15 * 60 * 1000, max: 5 }));
+  app.use("/api/trpc", limitProcedures((p) => p === "test.submit", rateLimit({ windowMs: 15 * 60 * 1000, max: 5 })));
+  // Evita que se adivinen códigos o la contraseña del panel probando muchas veces.
+  app.use("/api/trpc", limitProcedures((p) => p === "access.check", rateLimit({ windowMs: 15 * 60 * 1000, max: 20 })));
+  app.use("/api/trpc", limitProcedures((p) => p.startsWith("admin."), rateLimit({ windowMs: 15 * 60 * 1000, max: 60 })));
   app.use(
     "/api/trpc",
     express.json({ limit: "100kb" }),
     createExpressMiddleware({
       router: appRouter,
-      createContext: () => ({ deps }),
+      createContext: ({ req }) => {
+        const key = req.headers["x-admin-key"];
+        return { deps, adminKey: typeof key === "string" ? key : undefined };
+      },
       onError({ path: procedure, error }) {
         if (error.code === "BAD_REQUEST") logger.warn("ROUTER", "Solicitud rechazada por validación", { procedure });
         else if (error.code !== "INTERNAL_SERVER_ERROR") logger.warn("ROUTER", "Error de tRPC", { procedure, code: error.code });

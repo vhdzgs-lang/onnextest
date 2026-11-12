@@ -20,3 +20,19 @@ export const testSubmissions = mysqlTable("test_submissions", {
 });
 
 export type TestSubmissionRow = typeof testSubmissions.$inferSelect;
+
+/** Códigos de acceso que se venden por WhatsApp. Cada uno sirve para un solo test. */
+export const accessCodes = mysqlTable("access_codes", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Sin prefijo ni guiones (8 caracteres). Se muestra como ONX-XXXX-XXXX. */
+  code: varchar("code", { length: 16 }).notNull().unique(),
+  /** Nota libre del administrador: a quién se vendió, teléfono, etc. */
+  note: varchar("note", { length: 200 }),
+  redeemedAt: timestamp("redeemed_at"),
+  redeemedByName: varchar("redeemed_by_name", { length: 120 }),
+  redeemedByEmail: varchar("redeemed_by_email", { length: 254 }),
+  submissionId: int("submission_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type AccessCodeRow = typeof accessCodes.$inferSelect;

@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Quiz from "./pages/Quiz";
 import Done from "./pages/Done";
+import Admin from "./pages/Admin";
 import { createTrpcClient, trpc } from "./lib/trpc";
 
 export function AppRoutes() {
@@ -14,6 +15,7 @@ export function AppRoutes() {
       <Route path="/registro" component={Register} />
       <Route path="/test" component={Quiz} />
       <Route path="/listo" component={Done} />
+      <Route path="/admin" component={Admin} />
       <Route component={Home} />
     </Switch>
   );

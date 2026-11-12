@@ -2,7 +2,7 @@
  * Logs del servidor con etiqueta ([ROUTER], [PDF], [EMAIL], [DB], [SERVER]).
  * Nunca imprime claves: cualquier campo cuyo nombre parezca un secreto se reemplaza.
  */
-export type LogTag = "ROUTER" | "PDF" | "EMAIL" | "DB" | "SERVER";
+export type LogTag = "ROUTER" | "PDF" | "EMAIL" | "DB" | "SERVER" | "ADMIN";
 
 const SECRET_KEY = /(key|token|secret|password|authorization|database_url)/i;
 

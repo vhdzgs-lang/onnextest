@@ -12,6 +12,7 @@ import { build } from "vite";
 import { CAREERS } from "@shared/careers";
 import { createApp } from "../server/app";
 import { MemorySubmissionStore } from "../server/db/store";
+import { MemoryAccessCodeStore } from "../server/db/accessCodes";
 import { sendReportEmail, type ResendLike } from "../server/email";
 import { generatePdf, PUPPETEER_ARGS } from "../server/pdfGenerator";
 import { runStudentFlow } from "../scripts/e2eFlow";
@@ -20,6 +21,8 @@ const staticDir = path.resolve(import.meta.dirname, "../dist/public");
 const sent: Parameters<ResendLike["emails"]["send"]>[0][] = [];
 const fakeResend: ResendLike = { emails: { send: async (p) => (sent.push(p), { data: { id: "email_e2e" }, error: null }) } };
 const store = new MemorySubmissionStore();
+const codes = new MemoryAccessCodeStore();
+void codes.create(["AB3D7KPQ"], "venta de prueba");
 let server: Server;
 let browser: Browser;
 let baseUrl: string;
@@ -29,7 +32,7 @@ beforeAll(async () => {
     await build({ configFile: path.resolve(import.meta.dirname, "../vite.config.ts"), logLevel: "warn" });
   }
   const app = createApp(
-    { store, generatePdf, sendEmail: (email) => sendReportEmail(email, fakeResend), now: () => new Date() },
+    { store, codes, generatePdf, sendEmail: (email) => sendReportEmail(email, fakeResend), now: () => new Date() },
     { staticDir },
   );
   server = app.listen(0);
@@ -54,6 +57,7 @@ describe("flujo completo en celular", () => {
     for (const c of CAREERS) expect(result.bodyText).not.toContain(c.name);
 
     expect(store.rows).toHaveLength(1);
+    expect(codes.rows[0]).toMatchObject({ redeemedByName: "Ana Sofía Ramírez Treviño", submissionId: store.rows[0]!.id });
     expect(store.rows[0]!.delivery).toMatchObject({ pdfGenerated: true, emailSent: true, emailId: "email_e2e" });
     expect(sent).toHaveLength(1);
     expect(sent[0]!.to).toEqual(["vhdzgs@gmail.com"]);

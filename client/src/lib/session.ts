@@ -4,7 +4,7 @@ import type { StudentInput } from "@shared/validation";
  * Guardado temporal durante la sesión del navegador. Se borra al terminar el test
  * o al cerrar la pestaña, así que nunca quedan respuestas en el dispositivo.
  */
-const KEYS = { student: "onnex.student", answers: "onnex.answers", index: "onnex.index", done: "onnex.done" } as const;
+const KEYS = { student: "onnex.student", answers: "onnex.answers", index: "onnex.index", done: "onnex.done", code: "onnex.code" } as const;
 
 function read<T>(key: string): T | null {
   try {
@@ -26,6 +26,9 @@ function write(key: string, value: unknown) {
 export const session = {
   getStudent: () => read<StudentInput>(KEYS.student),
   setStudent: (s: StudentInput) => write(KEYS.student, s),
+  /** Código de acceso ya revisado en el registro (ONX-XXXX-XXXX). */
+  getAccessCode: () => read<string>(KEYS.code),
+  setAccessCode: (c: string) => write(KEYS.code, c),
   getAnswers: () => read<Record<number, number>>(KEYS.answers) ?? {},
   setAnswers: (a: Record<number, number>) => write(KEYS.answers, a),
   getIndex: () => read<number>(KEYS.index) ?? 0,
@@ -38,6 +41,7 @@ export const session = {
       sessionStorage.removeItem(KEYS.student);
       sessionStorage.removeItem(KEYS.answers);
       sessionStorage.removeItem(KEYS.index);
+      sessionStorage.removeItem(KEYS.code);
     } catch {
       /* sin almacenamiento */
     }
