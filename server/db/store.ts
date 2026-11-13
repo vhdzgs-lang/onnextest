@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import type { Answer, Student } from "@shared/validation";
 import { logger } from "../logger";
 import { testSubmissions } from "./schema";
+import { DrizzleAccessCodeStore, type AccessCodeStore } from "./accessCodes";
 
 export interface SubmissionRecord {
   id: number;
@@ -96,7 +97,7 @@ export class MemorySubmissionStore implements SubmissionStore {
 export async function createDatabaseStore(
   databaseUrl: string,
   { autoMigrate, ssl }: { autoMigrate: boolean; ssl: boolean },
-): Promise<SubmissionStore> {
+): Promise<{ store: SubmissionStore; codes: AccessCodeStore }> {
   const pool = mysql.createPool({
     uri: databaseUrl,
     connectionLimit: 5,
@@ -112,7 +113,7 @@ export async function createDatabaseStore(
     await migrate(db, { migrationsFolder });
     logger.info("DB", "Migraciones aplicadas", { migrationsFolder });
   }
-  return new DrizzleSubmissionStore(db);
+  return { store: new DrizzleSubmissionStore(db), codes: new DrizzleAccessCodeStore(db) };
 }
 
 function findMigrationsFolder(): string | undefined {

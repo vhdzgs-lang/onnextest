@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Router } from "wouter";
@@ -10,7 +10,11 @@ import { Logo } from "@/components/Logo";
 import { session } from "@/lib/session";
 import { STUDENT_CONFIRMATION } from "../server/routers";
 
+const checkAccessCode = vi.fn();
+vi.mock("@/lib/trpc", () => ({ checkAccessCode: (code: string) => checkAccessCode(code) }));
+
 beforeEach(() => {
+  checkAccessCode.mockReset();
   cleanup();
   sessionStorage.clear();
 });
@@ -39,7 +43,8 @@ describe("registro del estudiante", () => {
   it("muestra errores y no avanza con datos inválidos", async () => {
     const loc = renderAt("/registro", <Register />);
     await userEvent.click(screen.getByRole("button", { name: /comenzar test/i }));
-    expect(screen.getAllByRole("alert").length).toBe(4);
+    expect(screen.getAllByRole("alert").length).toBe(5);
+    expect(screen.getByText("Escribe tu código de acceso.")).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText("Correo electrónico"), "ana@");
     await userEvent.type(screen.getByLabelText("Edad"), "9");
     await userEvent.click(screen.getByRole("button", { name: /comenzar test/i }));
@@ -48,14 +53,31 @@ describe("registro del estudiante", () => {
     expect(loc.history).toEqual(["/registro"]);
   });
 
-  it("guarda los datos en la sesión y pasa al cuestionario", async () => {
+  it("no avanza si el código ya fue usado", async () => {
+    checkAccessCode.mockResolvedValue({ ok: false, message: "Ese código ya fue usado. Cada código sirve para un solo test." });
     const loc = renderAt("/registro", <Register />);
+    await userEvent.type(screen.getByLabelText(/Código de acceso/), "onx-ab3d-7kpq");
     await userEvent.type(screen.getByLabelText("Nombre completo"), "Ana Sofía Ramírez");
     await userEvent.type(screen.getByLabelText("Edad"), "17");
     await userEvent.type(screen.getByLabelText("Escuela"), "Prepa Tampico");
     await userEvent.type(screen.getByLabelText("Correo electrónico"), "ana@example.com");
     await userEvent.click(screen.getByRole("button", { name: /comenzar test/i }));
-    expect(loc.history.at(-1)).toBe("/test");
+    expect(await screen.findByText(/ya fue usado/)).toBeInTheDocument();
+    expect(loc.history).toEqual(["/registro"]);
+  });
+
+  it("guarda los datos en la sesión y pasa al cuestionario", async () => {
+    checkAccessCode.mockResolvedValue({ ok: true, code: "ONX-AB3D-7KPQ" });
+    const loc = renderAt("/registro", <Register />);
+    await userEvent.type(screen.getByLabelText(/Código de acceso/), "onx-ab3d-7kpq");
+    await userEvent.type(screen.getByLabelText("Nombre completo"), "Ana Sofía Ramírez");
+    await userEvent.type(screen.getByLabelText("Edad"), "17");
+    await userEvent.type(screen.getByLabelText("Escuela"), "Prepa Tampico");
+    await userEvent.type(screen.getByLabelText("Correo electrónico"), "ana@example.com");
+    await userEvent.click(screen.getByRole("button", { name: /comenzar test/i }));
+    await vi.waitFor(() => expect(loc.history.at(-1)).toBe("/test"));
+    expect(checkAccessCode).toHaveBeenCalledWith("ONX-AB3D-7KPQ");
+    expect(session.getAccessCode()).toBe("ONX-AB3D-7KPQ");
     expect(session.getStudent()).toMatchObject({ fullName: "Ana Sofía Ramírez", age: 17, email: "ana@example.com" });
   });
 });

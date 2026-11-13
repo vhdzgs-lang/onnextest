@@ -45,6 +45,6 @@ describe("validación de datos del estudiante", () => {
   });
 
   it("valida la solicitud completa", () => {
-    expect(submitTestSchema.safeParse({ student, answers: uniformAnswers(4) }).success).toBe(true);
+    expect(submitTestSchema.safeParse({ student, answers: uniformAnswers(4), accessCode: "ONX-AB3D-7KPQ" }).success).toBe(true);
   });
 });

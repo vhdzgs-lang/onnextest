@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { BarChart3, Brain, Compass, FileText, GraduationCap, Sparkles, Target, Clock, ShieldCheck, ArrowRight } from "lucide-react";
 import { Footer, Navbar } from "@/components/Layout";
+import { BRAND } from "@shared/brand";
 
 const BENEFITS = [
   { icon: Compass, title: "Evaluación vocacional personalizada", text: "50 preguntas pensadas para estudiantes de preparatoria que exploran tus intereses reales." },
@@ -12,8 +13,8 @@ const BENEFITS = [
 ];
 
 const STEPS = [
-  { n: "1", title: "Regístrate", text: "Escribe tu nombre, edad, escuela y correo." },
-  { n: "2", title: "Responde", text: "Contesta 50 preguntas con sinceridad. No hay respuestas buenas ni malas." },
+  { n: "1", title: "Obtén tu código", text: `Pide tu código de acceso por WhatsApp al ${BRAND.contactPhone}.` },
+  { n: "2", title: "Regístrate y responde", text: "Escribe tus datos y contesta 50 preguntas con sinceridad. No hay respuestas buenas ni malas." },
   { n: "3", title: "Recibe orientación", text: "Nuestro equipo revisa tus resultados y te contacta para compartirlos." },
 ];
 
@@ -53,6 +54,12 @@ export default function Home() {
                   <Clock className="h-4 w-4" /> Toma de 10 a 15 minutos
                 </span>
               </div>
+              <p className="mt-4 text-sm text-slate-600">
+                Necesitas un código de acceso.{" "}
+                <a href={BRAND.whatsappUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand-indigo underline">
+                  Pídelo por WhatsApp al {BRAND.contactPhone}
+                </a>
+              </p>
             </div>
             <div className="relative">
               <div className="bg-brand-gradient rounded-[2rem] p-6 text-white shadow-2xl shadow-indigo-500/30 sm:p-8">

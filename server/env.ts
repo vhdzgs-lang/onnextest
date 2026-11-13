@@ -17,5 +17,7 @@ export const env = {
     process.env.PUPPETEER_EXECUTABLE_PATH?.trim() || (existsSync("/usr/bin/chromium") ? "/usr/bin/chromium" : undefined),
   databaseSsl: process.env.DATABASE_SSL === "true",
   dbAutoMigrate: process.env.DB_AUTO_MIGRATE !== "false",
+  /** Contraseña del panel /admin (códigos de acceso). Si está vacía, el panel queda desactivado. */
+  adminPassword: process.env.ADMIN_PASSWORD?.trim() ?? "",
   trustProxy: process.env.TRUST_PROXY ?? "1",
 };

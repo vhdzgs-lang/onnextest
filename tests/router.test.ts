@@ -1,17 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { MemorySubmissionStore, type SubmissionStore } from "../server/db/store";
+import { MemoryAccessCodeStore } from "../server/db/accessCodes";
 import { appRouter, STUDENT_CONFIRMATION } from "../server/routers";
 import type { Deps } from "../server/trpc";
 import { student, uniformAnswers } from "./helpers";
 
-const input = { student, answers: uniformAnswers(4) };
+const input = { student, answers: uniformAnswers(4), accessCode: "ONX-AB3D-7KPQ" };
 const PDF = Buffer.from("%PDF-1.7 prueba");
 
 function setup(overrides: Partial<Deps> = {}) {
   const store = new MemorySubmissionStore();
+  const codes = new MemoryAccessCodeStore();
+  void codes.create(["AB3D7KPQ"], null);
   const deps: Deps = {
     store,
+    codes,
     generatePdf: vi.fn().mockResolvedValue(PDF),
     sendEmail: vi.fn().mockResolvedValue({ id: "email_1" }),
     now: () => new Date("2026-10-28T12:00:00Z"),

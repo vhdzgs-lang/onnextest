@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { accessCodeSchema } from "./accessCode";
 import { MAX_ANSWER, MIN_ANSWER, QUESTIONS, TOTAL_QUESTIONS } from "./questions";
 
 export const MIN_AGE = 12;
@@ -61,6 +62,8 @@ export type Answer = z.infer<typeof answersSchema>[number];
 export const submitTestSchema = z.object({
   student: studentSchema,
   answers: answersSchema,
+  /** Código de acceso comprado por WhatsApp (uno por test). */
+  accessCode: accessCodeSchema,
 });
 
 export type SubmitTestInput = z.input<typeof submitTestSchema>;

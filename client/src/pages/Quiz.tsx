@@ -4,7 +4,7 @@ import { Redirect, useLocation } from "wouter";
 import { ArrowLeft, ArrowRight, Loader2, Send } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { session } from "@/lib/session";
-import { trpc } from "@/lib/trpc";
+import { checkAccessCode, trpc } from "@/lib/trpc";
 import { studentSchema } from "@shared/validation";
 
 export function ProcessingScreen() {
@@ -29,11 +29,17 @@ export default function Quiz() {
   const [index, setIndex] = useState(() => session.getIndex());
   const [showRequired, setShowRequired] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [accessCode, setAccessCode] = useState(() => session.getAccessCode() ?? "");
+  /** Si el código ya no sirve al enviar (por ejemplo, alguien más lo usó), se pide otro sin perder respuestas. */
+  const [needsNewCode, setNeedsNewCode] = useState(false);
+  const [newCode, setNewCode] = useState("");
+  const [checkingCode, setCheckingCode] = useState(false);
+  const [codeNotice, setCodeNotice] = useState<string | null>(null);
   const advanceTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(advanceTimer.current), []);
 
-  if (!student || !studentSchema.safeParse(student).success) return <Redirect to="/registro" />;
+  if (!student || !studentSchema.safeParse(student).success || !accessCode) return <Redirect to="/registro" />;
 
   if (questionsQuery.isLoading) {
     return (
@@ -81,6 +87,23 @@ export default function Quiz() {
     if (firstTime && !isLast) advanceTimer.current = window.setTimeout(() => goTo(current + 1), 280);
   };
 
+  const useNewCode = async () => {
+    if (checkingCode) return;
+    setCheckingCode(true);
+    const check = await checkAccessCode(newCode);
+    setCheckingCode(false);
+    if (!check.ok) {
+      setSubmitError(check.message);
+      return;
+    }
+    session.setAccessCode(check.code);
+    setAccessCode(check.code);
+    setNeedsNewCode(false);
+    setNewCode("");
+    setSubmitError(null);
+    setCodeNotice("Código aceptado. Ahora presiona Enviar respuestas.");
+  };
+
   const onNext = async () => {
     if (selected === undefined) {
       setShowRequired(true);
@@ -94,15 +117,22 @@ export default function Quiz() {
       return;
     }
     setSubmitError(null);
+    setCodeNotice(null);
     try {
       await submit.mutateAsync({
         student,
         answers: questions.map((q) => ({ questionId: q.id, value: answers[q.id]! })),
+        accessCode,
       });
       session.clearTest();
       session.markDone();
       navigate("/listo", { replace: true });
     } catch (err) {
+      if (err instanceof TRPCClientError && err.data?.code === "FORBIDDEN") {
+        setNeedsNewCode(true);
+        setSubmitError(`${err.message} Escribe otro código para enviar; tus respuestas siguen guardadas.`);
+        return;
+      }
       // Solo se muestra el mensaje del servidor cuando es el aviso controlado para el estudiante.
       const isServerNotice = err instanceof TRPCClientError && err.data?.code === "INTERNAL_SERVER_ERROR";
       setSubmitError(
@@ -182,6 +212,35 @@ export default function Quiz() {
           <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 ring-1 ring-red-200">
             {submitError}
           </p>
+        )}
+        {codeNotice && (
+          <p role="status" className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
+            {codeNotice}
+          </p>
+        )}
+        {needsNewCode && (
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <label htmlFor="newAccessCode" className="sr-only">
+              Nuevo código de acceso
+            </label>
+            <input
+              id="newAccessCode"
+              value={newCode}
+              onChange={(e) => setNewCode(e.target.value.toUpperCase())}
+              placeholder="ONX-XXXX-XXXX"
+              autoComplete="off"
+              spellCheck={false}
+              className="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-mono text-base tracking-wider text-ink outline-none focus:border-brand-indigo focus:ring-4 focus:ring-indigo-100"
+            />
+            <button
+              type="button"
+              onClick={useNewCode}
+              disabled={checkingCode || !newCode.trim()}
+              className="whitespace-nowrap rounded-xl bg-ink px-5 py-3 font-semibold text-white disabled:opacity-50"
+            >
+              Usar este código
+            </button>
+          </div>
         )}
       </main>
 

@@ -18,6 +18,14 @@ Plataforma web de orientación vocacional para estudiantes de preparatoria en M�
    La respuesta indica `saved`, `pdfGenerated` y `emailSent`. El resultado de cada paso queda también en la tabla `test_submissions` (`pdf_generated`, `email_sent`, `email_id`, `delivery_error`).
 5. `/listo` Mensaje de confirmación. El estudiante nunca ve resultados; no existe ningún endpoint para consultarlos.
 
+## Códigos de acceso (venta por WhatsApp)
+
+Cada test requiere un código `ONX-XXXX-XXXX`. Un código sirve para **un solo test**.
+
+- El estudiante escribe el código en `/registro` (o llega con él en el enlace `/registro?codigo=ONX-XXXX-XXXX`). Se revisa antes de empezar y se marca como usado de forma atómica al enviar el test; si falla el guardado, vuelve a quedar disponible.
+- El administrador entra a `/admin` con la contraseña de `ADMIN_PASSWORD` para generar códigos (con una nota de a quién se vendió), copiar el mensaje listo para WhatsApp, ver cuáles se usaron y por quién, y borrar códigos sin usar.
+- Tabla `access_codes` (migración `drizzle/0001_access_codes.sql`, se aplica sola al iniciar).
+
 ## Variables de entorno
 
 | Variable | Obligatoria | Descripción |
@@ -28,6 +36,7 @@ Plataforma web de orientación vocacional para estudiantes de preparatoria en M�
 | `RESEND_API_KEY` | Sí | Clave de Resend (`re_...`). Solo vive en el servidor. |
 | `EMAIL_FROM` | Recomendada | Remitente de un **dominio verificado** en Resend, p. ej. `Onnex Test <reportes@tudominio.com>`. |
 | `PUPPETEER_EXECUTABLE_PATH` | No | Ruta a Chrome/Chromium si no se usa el que descarga Puppeteer (Docker: `/usr/bin/chromium`). |
+| `ADMIN_PASSWORD` | Sí para vender | Contraseña del panel `/admin`. Si está vacía, el panel queda desactivado. |
 | `PORT` | No | `3000` por defecto. |
 | `TRUST_PROXY` | No | Número de proxies delante del servidor (para el límite de 5 envíos cada 15 min por IP). |
 

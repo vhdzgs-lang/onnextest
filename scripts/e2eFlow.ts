@@ -5,7 +5,7 @@
 import puppeteer, { type Page } from "puppeteer";
 import { PUPPETEER_ARGS } from "../server/pdfGenerator";
 
-export async function runStudentFlow(page: Page, baseUrl: string, shotsDir?: string) {
+export async function runStudentFlow(page: Page, baseUrl: string, shotsDir?: string, accessCode = process.env.ACCESS_CODE ?? "ONX-AB3D-7KPQ") {
   const shot = async (name: string) => {
     if (shotsDir) await page.screenshot({ path: `${shotsDir}/${name}.png`, fullPage: true });
   };
@@ -17,10 +17,18 @@ export async function runStudentFlow(page: Page, baseUrl: string, shotsDir?: str
   await page.locator("form button[type=submit]").click();
   await page.waitForSelector("[role=alert]");
   await shot("02-registro-errores");
+  // Un código que no existe se rechaza antes de empezar.
+  await page.type("#accessCode", "ONX-ZZZZ-ZZZZ");
   await page.type("#fullName", "Ana Sofía Ramírez Treviño");
   await page.type("#age", "17");
   await page.type("#school", "Preparatoria Onnex Tampico");
   await page.type("#email", "ana.sofia@example.com");
+  await page.locator("form button[type=submit]").click();
+  await page.waitForFunction(() => document.getElementById("accessCode-error")?.textContent?.includes("no existe"));
+  await page.$eval("#accessCode", (el) => ((el as HTMLInputElement).value = ""));
+  await page.click("#accessCode", { count: 3 });
+  await page.keyboard.press("Backspace");
+  await page.type("#accessCode", accessCode.toLowerCase());
   await shot("03-registro");
   await page.locator("form button[type=submit]").click();
   await page.waitForSelector("[role=radiogroup]");
